@@ -1,0 +1,95 @@
+﻿using System;
+using System.Text;
+using System.Collections.Generic;
+
+namespace Ontos.Generators.Core.Utilities;
+
+public sealed class SourceBuilder
+{
+    private readonly StringBuilder _sb            = new();
+    private readonly Stack<BlockType> _blockStack = new(32);
+    private int _indent;
+
+    public void SetIndent(int level)
+    {
+        if (level < 0)
+            throw new Exception("SourceBuilder indent level cannot be negative");
+
+        _indent = level;
+    }
+
+    public void Line(string? text = null)
+    {
+        if (text is null)
+        {
+            _sb.AppendLine();
+            return;
+        }
+
+        _sb.Append(' ', _indent * 4);
+        _sb.AppendLine(text);
+    }
+
+    public void Write(string text, bool indent)
+    {
+        if (indent)
+            _sb.Append(' ', _indent * 4);
+
+        _sb.Append(text);
+    }
+
+    public void Append(SourceBuilder newSb)
+    {
+        if (newSb is null)
+        {
+            _sb.AppendLine();
+            return;
+        }
+
+        _sb.Append(newSb.ToString());
+    }
+
+    public void OpenBlock(string header, BlockType type = BlockType.Scope)
+    {
+        Line(header);
+
+        Line(type switch
+        {
+            BlockType.Scope         => "{",
+            BlockType.Collection    => "[",
+            BlockType.ParameterList => "(",
+            _ => ""
+        });
+
+        _blockStack.Push(type);
+
+        _indent++;
+    }
+
+    public void CloseBlock(string? trailer = null)
+    {
+        _indent--;
+
+        if (_indent < 0)
+            throw new Exception("SourceBuilder indent is invalid");
+
+        BlockType type = _blockStack.Pop();
+
+        Line(type switch
+        {
+            BlockType.Scope         => "}",
+            BlockType.Collection    => "]",
+            BlockType.ParameterList => ")",
+            _ => ""
+        } + trailer);
+    }
+
+    public override string ToString() => _sb.ToString();
+}
+
+public enum BlockType
+{
+    Scope,
+    Collection,
+    ParameterList
+}

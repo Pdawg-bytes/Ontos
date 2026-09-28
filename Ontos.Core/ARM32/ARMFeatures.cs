@@ -3,9 +3,8 @@
 namespace Ontos.Core.ARM32;
 
 [Flags]
-public enum ARMFeatures
+public enum ARMFeatures : uint
 {
     None  = 0,
-    Thumb = 1 << 0,
-    VFPv2 = 1 << 1,
+    VFPv2 = 1 << 0
 }

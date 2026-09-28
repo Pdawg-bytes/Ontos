@@ -1,6 +1,6 @@
 ﻿namespace Ontos.Core.ARM32;
 
-public enum ARMVersion
+public enum ARMVersion : byte
 {
     V1,
     V2,
