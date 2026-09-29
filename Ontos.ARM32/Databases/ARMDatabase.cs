@@ -300,6 +300,8 @@ internal static partial class InstructionDatabase
             ],
             Instructions:
             [
+                new Instruction(Name: "arm_PLD_reg", Mask: 0xFF70F010, Expected: 0xF750F000),
+                new Instruction(Name: "arm_PLD_imm", Mask: 0xFF70F000, Expected: 0xF550F000),
             ]
         ),
         new
