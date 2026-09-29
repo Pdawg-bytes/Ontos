@@ -10,7 +10,8 @@ internal sealed record DecoderModel(ARMVersion Version, ARMFeatures Features);
 internal sealed record ContainingTypeModel(
     string Keyword,
     string Name,
-    EquatableArray<string> TypeParameters);
+    EquatableArray<string> TypeParameters,
+    string Accessibility);
 
 internal sealed record TargetModel(
     string Namespace,
@@ -19,7 +20,8 @@ internal sealed record TargetModel(
     EquatableArray<string> TypeParameters,
     EquatableArray<ContainingTypeModel> ContainingTypes,
     EquatableArray<DecoderModel> Decoders,
-    bool ThumbDecode)
+    bool ThumbDecode,
+    string Accessibility)
 {
     public string SourceName
     {

@@ -9,6 +9,8 @@ using Ontos.Generators.Core.Collections;
 using Ontos.Generators.Core.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using static Ontos.Generators.Core.Utilities.SymbolExtensions;
+
 namespace Ontos.ARM32.Parsing;
 
 internal static class TargetParser
@@ -90,27 +92,21 @@ internal static class TargetParser
         List<ContainingTypeModel> containing = [];
 
         for (var c = symbol.ContainingType; c is not null; c = c.ContainingType)
-            containing.Add(new ContainingTypeModel(GetKeyword(c), c.Name, TypeParameterNames(c)));
+            containing.Add(new ContainingTypeModel(c.GetKeyword(), c.Name, c.TypeParameterNames(), c.GetAccessibilityString()));
 
         containing.Reverse();
 
         TargetModel model = new(
             Namespace:       symbol.ContainingNamespace.IsGlobalNamespace ? "" : symbol.ContainingNamespace.ToDisplayString(),
-            Keyword:         GetKeyword(symbol),
+            Keyword:         symbol.GetKeyword(),
             TypeName:        symbol.Name,
-            TypeParameters:  TypeParameterNames(symbol),
+            TypeParameters:  symbol.TypeParameterNames(),
             ContainingTypes: containing.ToEquatableArray(),
             Decoders:        decoders.ToEquatableArray(),
-            ThumbDecode:     decoders.Any(d => d.Version >= ARMVersion.V4T)
+            ThumbDecode:     decoders.Any(d => d.Version >= ARMVersion.V4T),
+            Accessibility:   symbol.GetAccessibilityString()
         );
 
         return new ParseResult(model, diagArray);
     }
-
-    private static string GetKeyword(INamedTypeSymbol s) =>
-        s.IsRecord ? (s.IsValueType ? "record struct" : "record")
-                   : (s.IsValueType ? "struct" : "class");
-
-    private static EquatableArray<string> TypeParameterNames(INamedTypeSymbol s) =>
-        s.TypeParameters.Select(p => p.Name).ToEquatableArray();
 }

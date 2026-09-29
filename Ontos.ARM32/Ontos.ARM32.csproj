@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +18,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ontos.Core\Ontos.Core.csproj" />
-    <ProjectReference Include="..\Ontos.Generators.Core\Ontos.Generators.Core.csproj" />
+    <Compile Include="..\Ontos.Core\ARM32\ARMFeatures.cs" Link="CoreShared\ARMFeatures.cs" />
+    <Compile Include="..\Ontos.Core\ARM32\ARMVersion.cs" Link="CoreShared\ARMVersion.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ontos.Generators.Core\Ontos.Generators.Core.csproj"
+                      PrivateAssets="all"
+                      GeneratePathProperty="true" />
   </ItemGroup>
 
 </Project>
