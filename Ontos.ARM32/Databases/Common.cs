@@ -39,4 +39,7 @@ internal enum VersionOverride
     V5_Unconditional, // Cond == 0b1111, V5+   (bits[31:28])
     V6_Unconditional, // Cond == 0b1111, V6+   (bits[31:28])
     V6K_SizeNotZero,  // Size != 0b00,   V6K+  (bits[22:21])
+
+    V5T_Thumb_LongBLX,  // H == 0b01,  V5T+ (bits[12:11]
+    V5T_Thumb_Link,     // L == 0b1,   V5T+ (bits[7])
 }
