@@ -54,9 +54,10 @@ public sealed class SourceBuilder
         _sb.Append(newSb.ToString());
     }
 
-    public void OpenBlock(string header, BlockType type = BlockType.Scope)
+    public void OpenBlock(string? header, BlockType type = BlockType.Scope)
     {
-        Line(header);
+        if (header is not null)
+            Line(header);
 
         Line(type switch
         {

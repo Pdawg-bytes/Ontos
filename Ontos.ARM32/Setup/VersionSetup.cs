@@ -21,6 +21,8 @@ internal readonly record struct InstructionPair(Instruction Definition, GroupInf
 
 internal static class VersionSetup
 {
+    internal const string OpsClass = "__OntosWrappers";
+
     private const uint CondNibble = 0xF0000000;
 
     internal static VersionOutput Build(ARMVersion version)
@@ -84,11 +86,11 @@ internal static class VersionSetup
 
             if (matches.Length == 0)
             {
-                lut[key] = Lambda(Call(set, null, null));
+                lut[key] = Call(set, null, null);
                 continue;
             }
 
-            lut[key] = Lambda(ResolveMatches(set, [.. matches.Select(m => m.Pair)], key, version, traits));
+            lut[key] = ResolveMatches(set, [.. matches.Select(m => m.Pair)], key, version, traits);
         }
 
         return Compress(lut);
@@ -228,8 +230,6 @@ internal static class VersionSetup
         return conditions.Count == 1 ? One(conditions[0]) : string.Join(" || ", conditions.Select(p => "(" + One(p) + ")"));
     }
 
-    private static string Lambda(string body) => "static (t, op) => " + body;
-
     private static string Resolve(InstructionSet set, GroupInfo g, uint op, ARMVersion version, HashSet<Trait> traits, string self = "t")
     {
         uint[] values = [.. g.Templated.Select(p => ExtractValue(op, p))];
@@ -270,10 +270,10 @@ internal static class VersionSetup
     private static string Call(InstructionSet set, GroupInfo? g, Trait? trait, string self = "t")
     {
         if (g is null)
-            return $"{self}.{GroupInfo.PrefixOf(set)}_Undefined(op)";
+            return $"{OpsClass}.{GroupInfo.PrefixOf(set)}_Undefined({self}, op)";
 
         return trait is null
-            ? $"{self}.{g.WrapperName}(op)"
-            : $"{self}.{g.WrapperName}<{trait.Name}>(op)";
+            ? $"{OpsClass}.{g.WrapperName}({self}, op)"
+            : $"{OpsClass}.{g.WrapperName}<{trait.Name}>({self}, op)";
     }
 }
