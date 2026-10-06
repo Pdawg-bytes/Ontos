@@ -39,6 +39,17 @@ internal static class TargetParser
             hasError = true;
         }
 
+        if (symbol.IsValueType)
+        {
+            diagnostics.Add(new DiagnosticInfo(
+                DiagnosticDescriptors.MustBeReferenceType,
+                LocationInfo.From(node.Identifier.GetLocation()),
+                new[] { displayName }.ToEquatableArray()
+            ));
+
+            hasError = true;
+        }
+
         HashSet<ARMVersion> seen    = [];
         List<DecoderModel> decoders = [];
 

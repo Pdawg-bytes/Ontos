@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Linq;
+using Ontos.Core.ARM32;
+using Ontos.ARM32.Setup;
 using Ontos.ARM32.Parsing;
+using Ontos.ARM32.Emission;
 using Microsoft.CodeAnalysis;
 using Ontos.Generators.Core.Utilities;
+using Ontos.Generators.Core.Collections;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Ontos.ARM32;
@@ -17,7 +21,7 @@ public sealed class ARMGenerator : IIncrementalGenerator
         var parsed = ctx.SyntaxProvider
             .ForAttributeWithMetadataName(
                 AttributeMetadataName,
-                predicate: static (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
                 transform: static (c, ct)   => TargetParser.Parse(c, ct)
             )
             .WithTrackingName("ARMParse");
@@ -32,14 +36,53 @@ public sealed class ARMGenerator : IIncrementalGenerator
             .Select(static (r, _) => r.Model!)
             .WithTrackingName("ARMTargets");
 
-        ctx.RegisterSourceOutput(targets, static (spc, model) =>
+        var versions = targets
+            .SelectMany(static (m, _) => m.Decoders.Select(d => (byte)d.Version).ToArray())
+            .Collect()
+            .Select(static (all, _) => all.Distinct().OrderBy(v => v).ToEquatableArray())
+            .WithTrackingName("ARMVersions");
+
+        var versionItems = versions.SelectMany(static (v, _) => v.ToArray());
+
+        var plans = versionItems
+            .Select(static (v, _) => VersionSetup.Build((ARMVersion)v))
+            .WithTrackingName("ARMPlans");
+
+        ctx.RegisterSourceOutput(
+            versions.Select(static (v, _) => v.Length == 0 ? (byte)0xFF : v[v.Length - 1]),
+            static (spc, highest) =>
+            {
+                if (highest != 0xFF)
+                    spc.AddSource("Ontos.TraitContracts.g.cs", ContractEmitter.EmitTraitContracts((ARMVersion)highest));
+            });
+
+        ctx.RegisterSourceOutput(versionItems, static (spc, v) =>
         {
+            var version = (ARMVersion)v;
+            spc.AddSource($"Ontos.{ContractEmitter.VersionInterfaceName(version)}.g.cs", ContractEmitter.EmitVersionInterface(version));
+        });
+
+        ctx.RegisterSourceOutput(plans.Collect(), static (spc, all) =>
+        {
+            if (all.IsEmpty)
+                return;
+
+            var traits = all.SelectMany(p => p.Traits).Distinct().OrderBy(t => t.Name, StringComparer.Ordinal).ToEquatableArray();
+            spc.AddSource("Ontos.Traits.g.cs", ContractEmitter.EmitTraits(traits));
+        });
+
+        ctx.RegisterSourceOutput(targets.Combine(plans.Collect()), static (spc, pair) =>
+        {
+            var (model, planArray) = pair;
+
             SourceBuilder builder = new();
+            builder.Line($"using {ContractEmitter.Namespace};");
+            builder.Line();
+
             EnterContainingType(builder, model);
-
-            // emit decoder
-
+            DecoderEmitter.EmitBody(builder, model, planArray);
             ExitContainingType(builder, model);
+
             spc.AddSource(model.SourceName, builder.ToString());
         });
     }
