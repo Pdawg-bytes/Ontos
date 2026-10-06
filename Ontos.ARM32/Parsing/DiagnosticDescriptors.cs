@@ -24,19 +24,20 @@ internal static class DiagnosticDescriptors
         isEnabledByDefault: true
     );
 
-    internal static readonly DiagnosticDescriptor MustBeReferenceType = new(
-        id:                 "ONT103",
-        title:              "Decoder target must be a reference type",
-        messageFormat:      "'{0}' is decorated with [ARMDecoder] but is a value type, the generated open-instance LUT requires a class",
+    internal static readonly DiagnosticDescriptor FeatureUnsupported = new(
+        id:                 "ONT102",
+        title:              "Feature not supported on this ARM version",
+        messageFormat:      "'{0}' requests ARMFeatures.{1} on ARMVersion.{2}, which does not support this feature",
         category:           Category,
         defaultSeverity:    DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
 
-    internal static readonly DiagnosticDescriptor FeatureUnsupported = new(
-        id:                 "ONT102",
-        title:              "Feature not supported on this ARM version",
-        messageFormat:      "'{0}' requests ARMFeatures.{1} on ARMVersion.{2}, which does not support this feature",
+
+    internal static readonly DiagnosticDescriptor MustBeReferenceType = new(
+        id:                 "ONT103",
+        title:              "Decoder target must be a reference type",
+        messageFormat:      "'{0}' is decorated with [ARMDecoder] but is a value type, the generated open-instance LUT requires a class",
         category:           Category,
         defaultSeverity:    DiagnosticSeverity.Error,
         isEnabledByDefault: true
