@@ -53,13 +53,13 @@ public sealed class ARMGenerator : IIncrementalGenerator
             static (spc, highest) =>
             {
                 if (highest != 0xFF)
-                    spc.AddSource("Ontos.TraitContracts.g.cs", ContractEmitter.EmitTraitContracts((ARMVersion)highest));
+                    spc.AddSource("Ontos.ARM32.TraitContracts.g.cs", ContractEmitter.EmitTraitContracts((ARMVersion)highest));
             });
 
         ctx.RegisterSourceOutput(versionItems, static (spc, v) =>
         {
             var version = (ARMVersion)v;
-            spc.AddSource($"Ontos.{ContractEmitter.VersionInterfaceName(version)}.g.cs", ContractEmitter.EmitVersionInterface(version));
+            spc.AddSource($"Ontos.ARM32.{ContractEmitter.VersionInterfaceName(version)}.g.cs", ContractEmitter.EmitVersionInterface(version));
         });
 
         ctx.RegisterSourceOutput(plans.Collect(), static (spc, all) =>
@@ -68,7 +68,7 @@ public sealed class ARMGenerator : IIncrementalGenerator
                 return;
 
             var traits = all.SelectMany(p => p.Traits).Distinct().OrderBy(t => t.Name, StringComparer.Ordinal).ToEquatableArray();
-            spc.AddSource("Ontos.Traits.g.cs", ContractEmitter.EmitTraits(traits));
+            spc.AddSource("Ontos.ARM32.Traits.g.cs", ContractEmitter.EmitTraits(traits));
         });
 
         ctx.RegisterSourceOutput(targets.Combine(plans.Collect()), static (spc, pair) =>
