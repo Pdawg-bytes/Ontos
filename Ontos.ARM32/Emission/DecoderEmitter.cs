@@ -17,8 +17,8 @@ internal static class DecoderEmitter
     internal static void EmitBody(SourceBuilder sb, TargetModel model, ImmutableArray<VersionOutput> versions)
     {
         string self      = model.TypeParameters.Length > 0 ? $"{model.TypeName}<{string.Join(", ", model.TypeParameters)}>" : model.TypeName;
-        string armT      = $"delegate* managed<{self}, uint, void>";
-        string thumbT    = $"delegate* managed<{self}, ushort, void>";
+        string armT      = $"global::System.Action<{self}, uint>";
+        string thumbT    = $"global::System.Action<{self}, ushort>";
         bool multi       = model.Decoders.Length > 1;
 
         var decoders = model.Decoders
@@ -92,7 +92,6 @@ internal static class DecoderEmitter
 
         foreach (var set in highest >= ARMVersion.V4T ? [ InstructionSet.ARM, InstructionSet.Thumb ] : new[] { InstructionSet.ARM })
         {
-            sb.OpenBlock($"private static class __OntosWrapper{set}", BlockType.Scope);
             foreach (var g in GroupCatalog.GroupsFor(set, highest))
             {
                 string generic = g.Templated.Length > 0 ? $"<T>" : "";
@@ -102,9 +101,8 @@ internal static class DecoderEmitter
                 string args    = string.Join(", ", g.Runtime.Select(p => Extract(p, src)));
 
                 sb.Line(Inline);
-                sb.Line($"private void {g.WrapperName}{generic}({self} t, {opType} opcode){where} => t.{g.MethodName}{generic}({args});");
+                sb.Line($"private void {g.WrapperName}{generic}({opType} opcode){where} => {g.MethodName}{generic}({args});");
             }
-            sb.CloseBlock();
         }
     }
 
