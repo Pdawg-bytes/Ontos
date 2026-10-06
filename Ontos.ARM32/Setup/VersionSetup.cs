@@ -11,7 +11,7 @@ namespace Ontos.ARM32.Setup;
 internal sealed record Trait(InstructionSet Set, string Group, EquatableArray<uint> Values)
 {
     internal GroupInfo Info => GroupCatalog.Find(Set, Group);
-    internal string Name => $"{Info.MethodName}_{string.Join("_", Values)}";
+    internal string Name    => $"{Info.MethodName}_{string.Join("_", Values)}";
 }
 
 internal sealed record LUT(EquatableArray<string> Handlers, EquatableArray<ushort> Map);
@@ -261,7 +261,7 @@ internal static class VersionSetup
         foreach (var r in p.Ranges)
         {
             int width = r.Hi - r.Lo + 1;
-            value = (value << width) | ((op >> r.Lo) & ((1u << width) - 1));
+            value     = (value << width) | ((op >> r.Lo) & ((1u << width) - 1));
         }
 
         return value;

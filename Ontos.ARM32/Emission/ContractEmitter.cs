@@ -86,7 +86,7 @@ internal static class ContractEmitter
             if (!first) sb.Line();
             first = false;
 
-            var info = t.Info;
+            GroupInfo info = t.Info;
             sb.OpenBlock($"internal readonly struct {t.Name} : {info.TraitInterface}");
 
             for (int i = 0; i < info.Templated.Length; i++)
