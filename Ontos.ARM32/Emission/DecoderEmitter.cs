@@ -16,10 +16,10 @@ internal static class DecoderEmitter
 
     internal static void EmitBody(SourceBuilder sb, TargetModel model, ImmutableArray<VersionOutput> versions)
     {
-        string self      = model.TypeParameters.Length > 0 ? $"{model.TypeName}<{string.Join(", ", model.TypeParameters)}>" : model.TypeName;
-        string armT      = $"delegate* managed<{self}, uint, void>";
-        string thumbT    = $"delegate* managed<{self}, ushort, void>";
-        bool multi       = model.Decoders.Length > 1;
+        string self   = model.TypeParameters.Length > 0 ? $"{model.TypeName}<{string.Join(", ", model.TypeParameters)}>" : model.TypeName;
+        string armT   = $"delegate* managed<{self}, uint, void>";
+        string thumbT = $"delegate* managed<{self}, ushort, void>";
+        bool multi    = model.Decoders.Length > 1;
 
         var decoders = model.Decoders
             .Select(d => (Decoder: d, Output: versions.First(p => p.Version == d.Version)))
