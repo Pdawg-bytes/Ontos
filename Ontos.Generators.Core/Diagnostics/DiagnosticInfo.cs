@@ -1,11 +1,11 @@
-﻿using System.Linq;
+using System.Linq;
 using Ontos.Generators.Core.Collections;
 
 namespace Ontos.Generators.Core.Diagnostics;
 
 using Microsoft.CodeAnalysis;
 
-public sealed record DiagnosticInfo(
+internal sealed record DiagnosticInfo(
     DiagnosticDescriptor Descriptor,
     LocationInfo? Location,
     EquatableArray<string> Args)

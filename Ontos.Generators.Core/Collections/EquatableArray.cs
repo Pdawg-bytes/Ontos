@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Ontos.Generators.Core.Collections;
 
-public static class EquatableArray
+internal static class EquatableArray
 {
     public static EquatableArray<T> AsEquatableArray<T>(this ImmutableArray<T> array)
         where T : IEquatable<T> => new(array);
@@ -16,7 +16,7 @@ public static class EquatableArray
         where T : IEquatable<T> => new(source.ToImmutableArray());
 }
 
-public readonly struct EquatableArray<T>(ImmutableArray<T> array) : IEquatable<EquatableArray<T>>, IEnumerable<T>
+internal readonly struct EquatableArray<T>(ImmutableArray<T> array) : IEquatable<EquatableArray<T>>, IEnumerable<T>
     where T : IEquatable<T>
 {
     private readonly T[]? _array = Unsafe.As<ImmutableArray<T>, T[]?>(ref array);

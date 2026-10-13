@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Collections.Generic;
 
 namespace Ontos.Generators.Core.Utilities;
 
-public sealed class SourceBuilder
+internal sealed class SourceBuilder
 {
     private readonly StringBuilder _sb            = new();
     private readonly Stack<BlockType> _blockStack = new(32);
@@ -93,7 +93,7 @@ public sealed class SourceBuilder
     public override string ToString() => _sb.ToString();
 }
 
-public enum BlockType
+internal enum BlockType
 {
     Scope,
     Collection,

@@ -5,6 +5,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Description>Attributes and enums consumed by Ontos decoder generators.</Description>
   </PropertyGroup>
 
 </Project>

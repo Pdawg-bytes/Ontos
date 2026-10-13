@@ -1,9 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Ontos.Generators.Core.Diagnostics;
 
-public sealed record LocationInfo(string FilePath, TextSpan TextSpan, LinePositionSpan LineSpan)
+internal sealed record LocationInfo(string FilePath, TextSpan TextSpan, LinePositionSpan LineSpan)
 {
     public static LocationInfo? From(Location? location)
     {

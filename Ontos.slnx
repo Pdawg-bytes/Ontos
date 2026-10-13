@@ -1,5 +1,7 @@
 <Solution>
+  <Folder Name="/Shared/">
+    <File Path="Ontos.Generators.Core/Ontos.Generators.Core.props" />
+  </Folder>
   <Project Path="Ontos.ARM32/Ontos.ARM32.csproj" Id="e8615df0-9f79-4d6c-b255-89c9015a4e98" />
   <Project Path="Ontos.Core/Ontos.Core.csproj" Id="72f798ce-84dd-4967-95e6-b2c30796bd39" />
-  <Project Path="Ontos.Generators.Core/Ontos.Generators.Core.csproj" Id="5c835cc7-d469-4add-a2a5-ed3f648399f7" />
 </Solution>

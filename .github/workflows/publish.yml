@@ -1,0 +1,60 @@
+name: Publish Ontos
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Pack NuGet Packages
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            dotnet pack Ontos.slnx -c Release -o artifacts -p:Version="${GITHUB_REF_NAME#v}"
+          else
+            dotnet pack Ontos.slnx -c Release -o artifacts
+          fi
+
+      - name: Authenticate with NuGet
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: Pdawg
+
+      - name: Push Packages to NuGet Gallery
+        run: |
+          dotnet nuget push "artifacts/*.nupkg" \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Add GitHub Packages Source
+        run: |
+          dotnet nuget add source \
+            "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --name github \
+            --username "${{ github.actor }}" \
+            --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text
+
+      - name: Push Packages to GitHub Packages
+        run: |
+          dotnet nuget push "artifacts/*.nupkg" \
+            --source github \
+            --skip-duplicate

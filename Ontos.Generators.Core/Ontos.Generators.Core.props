@@ -1,0 +1,9 @@
+<Project>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs"
+             Exclude="$(MSBuildThisFileDirectory)IsExternalInit.cs;$(MSBuildThisFileDirectory)bin\**;$(MSBuildThisFileDirectory)obj\**"
+             Link="GeneratorsCore\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

@@ -69,15 +69,6 @@ internal static class TargetParser
             ARMVersion version   = (ARMVersion)Convert.ToByte(vArg.Value);
             ARMFeatures features = (ARMFeatures)Convert.ToUInt32(fArg.Value);
 
-            if (version < ARMVersion.V6 && (features & ARMFeatures.VFPv2) != 0)
-            {
-                diagnostics.Add(new DiagnosticInfo(
-                    DiagnosticDescriptors.FeatureUnsupported,
-                    LocationInfo.From(attr.ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()),
-                    new[] { displayName, "VFPv2", version.ToString() }.ToEquatableArray()
-                ));
-            }
-
             if (!seen.Add(version))
             {
                 diagnostics.Add(new DiagnosticInfo(
