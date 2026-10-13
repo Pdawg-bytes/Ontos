@@ -62,8 +62,7 @@ internal static class VersionSetup
         if ((i.Definition.Expected & CondNibble) == CondNibble)
             return true;
 
-        var rule = GroupCatalog.RuleFor(i.Group.Override);
-
+        OverrideRule? rule = GroupCatalog.RuleFor(i.Group.Override);
         return rule is { Parameter: null } && version >= rule.Since;
     }
 
@@ -232,8 +231,8 @@ internal static class VersionSetup
 
     private static string Resolve(InstructionSet set, GroupInfo g, uint op, ARMVersion version, HashSet<Trait> traits, string self = "t")
     {
-        uint[] values = [.. g.Templated.Select(p => ExtractValue(op, p))];
-        var rule = GroupCatalog.RuleFor(g.Override);
+        uint[] values      = [.. g.Templated.Select(p => ExtractValue(op, p))];
+        OverrideRule? rule = GroupCatalog.RuleFor(g.Override);
 
         if (rule is { Parameter: not null } && version < rule.Since)
         {
@@ -258,7 +257,7 @@ internal static class VersionSetup
     {
         uint value = 0;
 
-        foreach (var r in p.Ranges)
+        foreach (BitRange r in p.Ranges)
         {
             int width = r.Hi - r.Lo + 1;
             value     = (value << width) | ((op >> r.Lo) & ((1u << width) - 1));
