@@ -6,5 +6,4 @@ namespace Ontos.Core.ARM32;
 public enum ARMFeatures : uint
 {
     None  = 0,
-    VFPv2 = 1 << 0
 }
