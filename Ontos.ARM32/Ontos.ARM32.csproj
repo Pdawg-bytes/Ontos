@@ -12,7 +12,6 @@
 
     <Description>ARM32 decoder source generator for Ontos.</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <DevelopmentDependency>true</DevelopmentDependency>
     <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
