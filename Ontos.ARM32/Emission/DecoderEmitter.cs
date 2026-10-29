@@ -82,12 +82,12 @@ internal static class DecoderEmitter
     private static void EmitUnconditional(SourceBuilder sb, string suffix, EquatableArray<string> body)
     {
         sb.Line();
-        sb.OpenBlock($"public void DispatchUnconditional{suffix.Replace("_", "")}(uint op)");
+        sb.OpenBlock($"public void DispatchUnconditional{suffix.Replace("_", "")}(uint opcode)");
 
         foreach (var line in body)
             sb.Line(line);
 
-        sb.Line("this.ARM_Undefined(op);");
+        sb.Line("this.ARM_Undefined(opcode);");
         sb.CloseBlock();
     }
 
@@ -103,7 +103,7 @@ internal static class DecoderEmitter
             string opType = set == InstructionSet.ARM ? "uint" : "ushort";
 
             sb.Line(Inline);
-            sb.Line($"public static void {GroupInfo.PrefixOf(set)}_Undefined({self} t, {opType} op) => t.{GroupInfo.PrefixOf(set)}_Undefined(op);");
+            sb.Line($"public static void {GroupInfo.PrefixOf(set)}_Undefined({self} t, {opType} opcode) => t.{GroupInfo.PrefixOf(set)}_Undefined(opcode);");
         }
 
         foreach (var set in sets)
