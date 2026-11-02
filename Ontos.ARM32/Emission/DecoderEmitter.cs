@@ -41,24 +41,24 @@ internal static class DecoderEmitter
         sb.Line();
         EmitWrappers(sb, model, self);
 
-        foreach (var (d, plan) in decoders)
+        foreach (var (d, version) in decoders)
         {
             string suffix = multi ? "_" + d.Version : "";
 
             sb.Line();
             sb.OpenBlock($"private static unsafe class __OntosLUT{suffix}");
-            EmitLUT(sb, "ARM", armT, "uint", plan.ARM);
+            EmitLUT(sb, "ARM", self, armT, "uint", version.ARM);
 
-            if (plan.ARMUnconditional is not null)
+            if (version.ARMUnconditional is not null)
             {
                 sb.Line();
-                EmitLUT(sb, "Unconditional", armT, "uint", plan.ARMUnconditional);
+                EmitLUT(sb, "Unconditional", self, armT, "uint", version.ARMUnconditional);
             }
 
-            if (plan.Thumb is not null)
+            if (version.Thumb is not null)
             {
                 sb.Line();
-                EmitLUT(sb, "Thumb", thumbT, "ushort", plan.Thumb);
+                EmitLUT(sb, "Thumb", self, thumbT, "ushort", version.Thumb);
             }
 
             sb.CloseBlock();
@@ -118,10 +118,8 @@ internal static class DecoderEmitter
         sb.CloseBlock();
     }
 
-    private static void EmitLUT(SourceBuilder sb, string set, string delegateT, string opType, LUT lut)
+    private static void EmitLUT(SourceBuilder sb, string set, string self, string delegateT, string opType, LUT lut)
     {
-        string self = delegateT.Substring("delegate* managed<".Length, delegateT.IndexOf(',') - "delegate* managed<".Length);
-
         string[] targets = new string[lut.Handlers.Length];
 
         for (int i = 0; i < lut.Handlers.Length; i++)
