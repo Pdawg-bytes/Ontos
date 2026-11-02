@@ -15,7 +15,7 @@ internal sealed record Trait(InstructionSet Set, string Group, EquatableArray<ui
 }
 
 internal sealed record LUT(EquatableArray<string> Handlers, EquatableArray<ushort> Map);
-internal sealed record VersionOutput(ARMVersion Version, LUT ARM, EquatableArray<string>? ARMUnconditional, LUT? Thumb, EquatableArray<Trait> Traits);
+internal sealed record VersionOutput(ARMVersion Version, LUT ARM, LUT? ARMUnconditional, LUT? Thumb, EquatableArray<Trait> Traits);
 
 internal readonly record struct InstructionPair(Instruction Definition, GroupInfo Group);
 
@@ -23,15 +23,16 @@ internal static class VersionSetup
 {
     internal const string OpsClass = "__OntosWrappers";
 
-    private const uint CondNibble = 0xF0000000;
+    private const uint CondNibble    = 0xF0000000;
+    private const uint UncondLUTMask = 0x0FF10010;
 
     internal static VersionOutput Build(ARMVersion version)
     {
         HashSet<Trait> traits = [];
 
-        LUT arm                        = BuildLUT(InstructionSet.ARM, version, traits);
-        EquatableArray<string>? uncond = version >= ARMVersion.V5  ? BuildUnconditional(version, traits)             : null;
-        LUT? thumb                     = version >= ARMVersion.V4T ? BuildLUT(InstructionSet.Thumb, version, traits) : null;
+        LUT arm      = BuildLUT(InstructionSet.ARM, version, traits);
+        LUT? uncond  = version >= ARMVersion.V5  ? BuildLUT(InstructionSet.ARM, version, traits, true) : null;
+        LUT? thumb   = version >= ARMVersion.V4T ? BuildLUT(InstructionSet.Thumb, version, traits) : null;
 
         return new VersionOutput(version, arm, uncond, thumb, traits.OrderBy(t => t.Name, StringComparer.Ordinal).ToEquatableArray());
     }
@@ -43,13 +44,17 @@ internal static class VersionSetup
         return n;
     }
 
-    private static uint ToKey(InstructionSet set, uint word) => set == InstructionSet.ARM
-        ? ((word & 0x0FF00000) >> 16) | ((word & 0x000000F0) >> 4)
-        : (word & 0xFFC0) >> 6;
+    private static uint ToKey(InstructionSet set, uint word, bool uncond) =>
+        uncond ? ((word >> 18) & 0x3FC) | ((word >> 15) & 0x2) | ((word >> 4) & 0x1)
+        : set == InstructionSet.ARM
+            ? ((word & 0x0FF00000) >> 16) | ((word & 0x000000F0) >> 4)
+            : (word & 0xFFC0) >> 6;
 
-    private static uint KeyToOpcode(InstructionSet set, int key) => set == InstructionSet.ARM
-        ? (((uint)key >> 4) & 0xFF) << 20 | ((uint)key & 0xF) << 4
-        : (uint)key << 6;
+    private static uint KeyToOpcode(InstructionSet set, int key, bool uncond) =>
+        uncond ? CondNibble | (((uint)key >> 2) & 0xFF) << 20 | (((uint)key >> 1) & 1) << 16 | ((uint)key & 1) << 4
+        : set == InstructionSet.ARM
+            ? (((uint)key >> 4) & 0xFF) << 20 | ((uint)key & 0xF) << 4
+            : (uint)key << 6;
 
     private static InstructionPair[] GetInstructions(InstructionSet set, ARMVersion version) =>
         [..GroupCatalog.GroupsFor(set, version)
@@ -66,15 +71,17 @@ internal static class VersionSetup
         return rule is { Parameter: null } && version >= rule.Since;
     }
 
-    private static LUT BuildLUT(InstructionSet set, ARMVersion version, HashSet<Trait> traits)
+    private static LUT BuildLUT(InstructionSet set, ARMVersion version, HashSet<Trait> traits, bool uncond = false)
     {
         bool arm = set == InstructionSet.ARM;
-        int size = arm ? 4096 : 1024;
+        int size = uncond ? 1024 : arm ? 4096 : 1024;
 
-        InstructionPair[] instructions = [..GetInstructions(set, version).Where(i => !arm || (i.Definition.Expected & CondNibble) != CondNibble)];
+        InstructionPair[] instructions = [..GetInstructions(set, version).Where(i => uncond
+            ? IsUnconditional(i, version)
+            : !arm || (i.Definition.Expected & CondNibble) != CondNibble)];
 
         var keyed = instructions
-            .Select(i => (Pair: i, Mask: ToKey(set, i.Definition.Mask), Expected: ToKey(set, i.Definition.Expected)))
+            .Select(i => (Pair: i, Mask: ToKey(set, i.Definition.Mask, uncond), Expected: ToKey(set, i.Definition.Expected, uncond)))
             .ToArray();
 
         string[] lut = new string[size];
@@ -89,7 +96,7 @@ internal static class VersionSetup
                 continue;
             }
 
-            lut[key] = ResolveMatches(set, [.. matches.Select(m => m.Pair)], key, version, traits);
+            lut[key] = ResolveMatches(set, [.. matches.Select(m => m.Pair)], key, version, traits, uncond);
         }
 
         return Compress(lut);
@@ -116,48 +123,10 @@ internal static class VersionSetup
         return new LUT(handlers.ToEquatableArray(), map.ToEquatableArray());
     }
 
-    private static EquatableArray<string> BuildUnconditional(ARMVersion version, HashSet<Trait> traits)
+    private static string ResolveMatches(InstructionSet set, InstructionPair[] matches, int key, ARMVersion version, HashSet<Trait> traits, bool uncond)
     {
-        InstructionPair[] instructions = [..GetInstructions(InstructionSet.ARM, version).Where(i => IsUnconditional(i, version))];
-        List<string> lines             = [];
-
-        foreach (var (def, g) in instructions)
-        {
-            uint expected  = def.Expected & def.Mask;
-            uint templated = MaskFromRanges(g.Templated.SelectMany(p => p.Ranges).Select(r => (r.Hi, r.Lo)));
-            uint free      = templated & ~def.Mask;
-            string test    = $"(op & 0x{def.Mask:X8}) == 0x{expected:X8}";
-
-            if (free == 0)
-            {
-                lines.Add($"if ({test}) {{ {Resolve(InstructionSet.ARM, g, expected, version, traits, "this")}; return; }}");
-                continue;
-            }
-
-            lines.Add($"if ({test})");
-            lines.Add("{");
-            lines.Add($"    switch (op & 0x{free:X8})");
-            lines.Add("    {");
-
-            uint sub = 0;
-            do
-            {
-                lines.Add($"        case 0x{sub:X8}: {Resolve(InstructionSet.ARM, g, expected | sub, version, traits, "this")}; return;");
-                sub = (sub - free) & free;
-            }
-            while (sub != 0);
-
-            lines.Add("    }");
-            lines.Add("}");
-        }
-
-        return lines.ToEquatableArray();
-    }
-
-    private static string ResolveMatches(InstructionSet set, InstructionPair[] matches, int key, ARMVersion version, HashSet<Trait> traits)
-    {
-        uint lutMask = set == InstructionSet.ARM ? 0x0FF000F0 : 0xFFC0u;
-        uint op      = KeyToOpcode(set, key);
+        uint lutMask = uncond ? UncondLUTMask | CondNibble : set == InstructionSet.ARM ? 0x0FF000F0 : 0xFFC0u;
+        uint op      = KeyToOpcode(set, key, uncond);
 
         List<(string Call, List<(uint Mask, uint Expected)>? Conditions)> cases = [];
 
@@ -224,7 +193,7 @@ internal static class VersionSetup
 
     private static string Test(List<(uint Mask, uint Expected)> conditions)
     {
-        string One((uint Mask, uint Expected) p) => $"(op & 0x{p.Mask:X}) == 0x{p.Expected:X}";
+        static string One((uint Mask, uint Expected) p) => $"(op & 0x{p.Mask:X}) == 0x{p.Expected:X}";
 
         return conditions.Count == 1 ? One(conditions[0]) : string.Join(" || ", conditions.Select(p => "(" + One(p) + ")"));
     }

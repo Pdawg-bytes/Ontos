@@ -32,7 +32,7 @@ internal static class DecoderEmitter
             EmitDispatch(sb, "ARM", suffix, armT, "uint", "((opcode >> 16) & 0xFF0) | ((opcode >> 4) & 0xF)");
 
             if (version.ARMUnconditional is not null)
-                EmitUnconditional(sb, suffix, version.ARMUnconditional.Value);
+                EmitDispatch(sb, "Unconditional", suffix, armT, "uint", "((opcode >> 18) & 0x3FC) | ((opcode >> 15) & 0x2) | ((opcode >> 4) & 0x1)");
 
             if (version.Thumb is not null)
                 EmitDispatch(sb, "Thumb", suffix, thumbT, "ushort", "opcode >> 6");
@@ -48,6 +48,12 @@ internal static class DecoderEmitter
             sb.Line();
             sb.OpenBlock($"private static unsafe class __OntosLUT{suffix}");
             EmitLUT(sb, "ARM", armT, "uint", plan.ARM);
+
+            if (plan.ARMUnconditional is not null)
+            {
+                sb.Line();
+                EmitLUT(sb, "Unconditional", armT, "uint", plan.ARMUnconditional);
+            }
 
             if (plan.Thumb is not null)
             {
@@ -76,18 +82,6 @@ internal static class DecoderEmitter
         sb.Line(");");
         sb.Line();
         sb.Line($"(({delegateT})funcPtrAddress)(this, opcode);");
-        sb.CloseBlock();
-    }
-
-    private static void EmitUnconditional(SourceBuilder sb, string suffix, EquatableArray<string> body)
-    {
-        sb.Line();
-        sb.OpenBlock($"public void DispatchUnconditional{suffix.Replace("_", "")}(uint opcode)");
-
-        foreach (var line in body)
-            sb.Line(line);
-
-        sb.Line("this.ARM_Undefined(opcode);");
         sb.CloseBlock();
     }
 
@@ -141,8 +135,7 @@ internal static class DecoderEmitter
             }
 
             targets[i] = $"(nint)({delegateT})&{set}_{i}";
-            sb.Line($"private static void {set}_{i}({self} t, {opType} op)");
-            sb.Line(body);
+            sb.Line($"private static void {set}_{i}({self} t, {opType} op) {body}");
         }
 
         sb.Line();
