@@ -2,6 +2,7 @@
 A collection of source-generator-based reusable ISA decoders.
 
 Each decoder is a Roslyn incremental generator. You declare a `partial` type with a decoder attribute, and the generator emits the instruction dispatch tables and the contracts you implement.
+Generators will emit user-facing types and definitions into the core namespace (i.e. `Ontos.Core.ARM32`) rather than the generated namespace to avoid cluttering suggestion tools like IntelliSense.
 
 ## Packages
 
@@ -25,7 +26,6 @@ dotnet add package Ontos.ARM32
 
 ```csharp
 using Ontos.Core.ARM32;
-using Ontos.ARM32.Generated;
 
 [ARMDecoder(ARMVersion.V6)]
 public partial class ARMImplementation : IARMv6 /* generated contract */

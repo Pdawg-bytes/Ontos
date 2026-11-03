@@ -9,7 +9,8 @@ namespace Ontos.ARM32.Emission;
 
 internal static class ContractEmitter
 {
-    internal const string Namespace = "Ontos.ARM32.Generated";
+    internal const string Namespace     = "Ontos.ARM32.Generated";
+    internal const string CoreNamespace = "Ontos.Core.ARM32";
 
     internal static string VersionInterfaceName(ARMVersion v) => "IARMv" + v.ToString().Substring(1);
 
@@ -44,7 +45,7 @@ internal static class ContractEmitter
     internal static string EmitVersionInterface(ARMVersion version)
     {
         SourceBuilder sb = new();
-        sb.OpenBlock($"namespace {Namespace}");
+        sb.OpenBlock($"namespace {CoreNamespace}");
         sb.OpenBlock($"public interface {VersionInterfaceName(version)}");
 
         foreach (var set in SetsFor(version))
