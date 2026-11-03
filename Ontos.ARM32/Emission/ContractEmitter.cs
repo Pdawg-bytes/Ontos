@@ -10,8 +10,8 @@ namespace Ontos.ARM32.Emission;
 internal static class ContractEmitter
 {
     internal const string Namespace          = "Ontos.ARM32.Generated";
-    internal const string ContractsNamespace = Namespace + ".Contracts";
     internal const string TraitsNamespace    = Namespace + ".Traits";
+    internal const string ContractsNamespace = Namespace + ".Contracts";
 
     internal static string VersionInterfaceName(ARMVersion v) => "IARMv" + v.ToString().Substring(1);
 
@@ -79,6 +79,8 @@ internal static class ContractEmitter
     internal static string EmitTraits(EquatableArray<Trait> traits)
     {
         SourceBuilder sb = new();
+        sb.Line($"using {ContractsNamespace};");
+        sb.Line();
         sb.OpenBlock($"namespace {TraitsNamespace}");
 
         bool first = true;

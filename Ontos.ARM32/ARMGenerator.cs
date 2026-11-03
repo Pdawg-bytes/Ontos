@@ -76,7 +76,8 @@ public sealed class ARMGenerator : IIncrementalGenerator
             var (model, planArray) = pair;
 
             SourceBuilder builder = new();
-            builder.Line($"using {ContractEmitter.Namespace};");
+            builder.Line($"using {ContractEmitter.TraitsNamespace};");
+            builder.Line($"using {ContractEmitter.ContractsNamespace};");
             builder.Line();
 
             EnterContainingType(builder, model);
