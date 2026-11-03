@@ -9,8 +9,9 @@ namespace Ontos.ARM32.Emission;
 
 internal static class ContractEmitter
 {
-    internal const string Namespace     = "Ontos.ARM32.Generated";
-    internal const string CoreNamespace = "Ontos.Core.ARM32";
+    internal const string Namespace          = "Ontos.ARM32.Generated";
+    internal const string ContractsNamespace = Namespace + ".Contracts";
+    internal const string TraitsNamespace    = Namespace + ".Traits";
 
     internal static string VersionInterfaceName(ARMVersion v) => "IARMv" + v.ToString().Substring(1);
 
@@ -20,7 +21,7 @@ internal static class ContractEmitter
     internal static string EmitTraitContracts(ARMVersion highest)
     {
         SourceBuilder sb = new();
-        sb.OpenBlock($"namespace {Namespace}");
+        sb.OpenBlock($"namespace {ContractsNamespace}");
 
         bool first = true;
 
@@ -45,7 +46,7 @@ internal static class ContractEmitter
     internal static string EmitVersionInterface(ARMVersion version)
     {
         SourceBuilder sb = new();
-        sb.OpenBlock($"namespace {CoreNamespace}");
+        sb.OpenBlock($"namespace {ContractsNamespace}");
         sb.OpenBlock($"public interface {VersionInterfaceName(version)}");
 
         foreach (var set in SetsFor(version))
@@ -78,24 +79,24 @@ internal static class ContractEmitter
     internal static string EmitTraits(EquatableArray<Trait> traits)
     {
         SourceBuilder sb = new();
-        sb.OpenBlock($"namespace {Namespace}");
+        sb.OpenBlock($"namespace {TraitsNamespace}");
 
         bool first = true;
 
-        foreach (var t in traits)
+        foreach (var trait in traits)
         {
             if (!first) sb.Line();
             first = false;
 
-            GroupInfo info = t.Info;
-            sb.OpenBlock($"internal readonly struct {t.Name} : {info.TraitInterface}");
+            GroupInfo info = trait.Info;
+            sb.OpenBlock($"internal readonly struct {trait.Name} : {info.TraitInterface}");
 
             for (int i = 0; i < info.Templated.Length; i++)
             {
                 ParameterInfo p = info.Templated[i];
-                string v    = p.Width == 1 ? (t.Values[i] != 0 ? "true" : "false") : t.Values[i].ToString();
+                string value    = p.Width == 1 ? (trait.Values[i] != 0 ? "true" : "false") : trait.Values[i].ToString();
 
-                sb.Line($"public static {p.TypeName} {p.Name} => {v};");
+                sb.Line($"public static {p.TypeName} {p.Name} => {value};");
             }
 
             sb.CloseBlock();
