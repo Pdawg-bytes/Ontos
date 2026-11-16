@@ -969,8 +969,6 @@ internal static partial class InstructionDatabase
             ],
             Instructions:
             [
-                new Instruction(Name: "arm_PLD_reg", Mask: 0xFF30F010, Expected: 0xF710F000),
-                new Instruction(Name: "arm_PLD_imm", Mask: 0xFF30F000, Expected: 0xF510F000),
                 new Instruction(Name: "arm_LDR_lit", Mask: 0x0F7F0000, Expected: 0x051F0000),
                 new Instruction(Name: "arm_LDRB_lit", Mask: 0x0F7F0000, Expected: 0x055F0000),
                 new Instruction(Name: "arm_LDR_reg", Mask: 0x0E500010, Expected: 0x06100000),
@@ -994,6 +992,7 @@ internal static partial class InstructionDatabase
                 new Parameter("Immediate", ParameterKind.Templated, [ new BitRange(25, 25), ]),
                 new Parameter("Opcode", ParameterKind.Templated, [ new BitRange(21, 24), ]),
                 new Parameter("SetFlags", ParameterKind.Templated, [ new BitRange(20, 20), ]),
+                new Parameter("RegisterShift", ParameterKind.Templated, [ new BitRange(4, 4), ]),
                 new Parameter("Rn", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
                 new Parameter("Rd", ParameterKind.Runtime, [ new BitRange(12, 15), ]),
                 new Parameter("Operand2", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
