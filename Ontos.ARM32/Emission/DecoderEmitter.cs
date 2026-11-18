@@ -194,12 +194,10 @@ internal static class DecoderEmitter
 
         string value = terms.Count == 1 ? terms[0] : string.Join(" | ", terms.Select(t => $"({t})"));
 
-        return p.TypeName switch
+        return p.RuntimeTypeName switch
         {
-            "bool"   => $"({value}) != 0",
-            "byte"   => $"(byte)({value})",
-            "ushort" => $"(ushort)({value})",
-            _        => value
+            "bool" => $"({value}) != 0",
+            _      => value
         };
     }
 }
