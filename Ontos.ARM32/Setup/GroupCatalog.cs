@@ -21,7 +21,7 @@ internal sealed class ParameterInfo(string name, BitRange[] ranges)
 
     internal string ArgName { get; } = ToArgName(name);
 
-    internal string TypeName => Width == 1 ? "bool" : Width <= 8 ? "byte" : Width <= 16 ? "ushort" : "uint";
+    internal string TypeName        => Width == 1 ? "bool" : Width <= 8 ? "byte" : Width <= 16 ? "ushort" : "uint";
     internal string RuntimeTypeName => Width == 1 ? "bool" : "uint";
 
     private static string ToArgName(string name)
