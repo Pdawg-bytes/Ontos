@@ -4,9 +4,9 @@ using System.Text;
 using Ontos.Core.ARM32;
 using Ontos.ARM32.Setup;
 using Ontos.ARM32.Parsing;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Ontos.Generators.Core.Utilities;
-using Ontos.Generators.Core.Collections;
 
 namespace Ontos.ARM32.Emission;
 
@@ -169,8 +169,8 @@ internal static class DecoderEmitter
 
     private static string Extract(ParameterInfo p, string op)
     {
-        int outShift = p.Width;
-        var terms    = new System.Collections.Generic.List<string>();
+        int outShift        = p.Width;
+        List<string> terms  = [];
 
         foreach (var r in p.Ranges)
         {
@@ -192,6 +192,14 @@ internal static class DecoderEmitter
             terms.Add(diff == 0 ? $"{op} & {m}" : $"{src} & {m}");
         }
 
-        return terms.Count == 1 ? terms[0] : string.Join(" | ", terms.Select(t => $"({t})"));
+        string value = terms.Count == 1 ? terms[0] : string.Join(" | ", terms.Select(t => $"({t})"));
+
+        return p.TypeName switch
+        {
+            "bool"   => $"({value}) != 0",
+            "byte"   => $"(byte)({value})",
+            "ushort" => $"(ushort)({value})",
+            _        => value
+        };
     }
 }

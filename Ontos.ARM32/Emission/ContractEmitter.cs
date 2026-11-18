@@ -69,7 +69,7 @@ internal static class ContractEmitter
 
     internal static string Signature(GroupInfo g)
     {
-        string args    = string.Join(", ", g.Runtime.Select(p => $"uint {p.ArgName}"));
+        string args    = string.Join(", ", g.Runtime.Select(p => $"{p.TypeName} {p.ArgName}"));
         string generic = g.Templated.Length > 0 ? "<T>" : "";
         string where   = g.Templated.Length > 0 ? $" where T : struct, {g.TraitInterface}" : "";
 
