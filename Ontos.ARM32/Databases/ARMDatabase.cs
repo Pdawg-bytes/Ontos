@@ -296,7 +296,7 @@ internal static partial class InstructionDatabase
                 new Parameter("RegisterOffset", ParameterKind.Templated, [ new BitRange(25, 25), ]),
                 new Parameter("AddOffset", ParameterKind.Templated, [ new BitRange(23, 23), ]),
                 new Parameter("Rn", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
-                new Parameter("Value", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
+                new Parameter("Operand", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
             ],
             Instructions:
             [
@@ -732,7 +732,7 @@ internal static partial class InstructionDatabase
                 new Parameter("Store", ParameterKind.Templated, [ new BitRange(5, 5), ]),
                 new Parameter("Rn", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
                 new Parameter("Rd", ParameterKind.Runtime, [ new BitRange(12, 15), ]),
-                new Parameter("Value", ParameterKind.Runtime, [ new BitRange(8, 11), new BitRange(0, 3), ]),
+                new Parameter("Operand", ParameterKind.Runtime, [ new BitRange(8, 11), new BitRange(0, 3), ]),
             ],
             Instructions:
             [
@@ -822,7 +822,7 @@ internal static partial class InstructionDatabase
                 new Parameter("Opcode", ParameterKind.Templated, [ new BitRange(5, 6), ]),
                 new Parameter("Rn", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
                 new Parameter("Rd", ParameterKind.Runtime, [ new BitRange(12, 15), ]),
-                new Parameter("Value", ParameterKind.Runtime, [ new BitRange(8, 11), new BitRange(0, 3), ]),
+                new Parameter("Operand", ParameterKind.Runtime, [ new BitRange(8, 11), new BitRange(0, 3), ]),
             ],
             Instructions:
             [
@@ -852,7 +852,7 @@ internal static partial class InstructionDatabase
                 new Parameter("Mode", ParameterKind.Templated, [ new BitRange(21, 21), ]),
                 new Parameter("Mask", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
                 new Parameter("Rd", ParameterKind.Runtime, [ new BitRange(12, 15), ]),
-                new Parameter("Value", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
+                new Parameter("Operand", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
             ],
             Instructions:
             [
@@ -909,7 +909,7 @@ internal static partial class InstructionDatabase
                 new Parameter("Rn", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
                 new Parameter("CRd", ParameterKind.Runtime, [ new BitRange(12, 15), ]),
                 new Parameter("CoprocID", ParameterKind.Runtime, [ new BitRange(8, 11), ]),
-                new Parameter("Value", ParameterKind.Runtime, [ new BitRange(0, 7), ]),
+                new Parameter("Offset", ParameterKind.Runtime, [ new BitRange(0, 7), ]),
             ],
             Instructions:
             [
@@ -965,7 +965,7 @@ internal static partial class InstructionDatabase
                 new Parameter("Load", ParameterKind.Templated, [ new BitRange(20, 20), ]),
                 new Parameter("Rn", ParameterKind.Runtime, [ new BitRange(16, 19), ]),
                 new Parameter("Rd", ParameterKind.Runtime, [ new BitRange(12, 15), ]),
-                new Parameter("Value", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
+                new Parameter("Operand", ParameterKind.Runtime, [ new BitRange(0, 11), ]),
             ],
             Instructions:
             [
